@@ -1,0 +1,32 @@
+name: Auto Deployment
+"on":
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+        
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run Pytest
+        # Map the GitHub secret to the environment variable your Python code is looking for
+        env: 
+          MONGO_URI: ${{ secrets.MONGO_URI }}
+          TEST_MONGO_URI: ${{ secrets.TEST_MONGO_URI }}
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}
+        run: pytest
+
+      - name: Build Solution
+        run: python app.py
