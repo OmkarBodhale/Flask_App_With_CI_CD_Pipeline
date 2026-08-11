@@ -22,6 +22,16 @@ def index():
     students = mongo.db.students.find()
     return render_template('index.html', students=students)
 
+@app.route('/health', methods=['GET', 'POST'])
+def health():
+    try:
+        mongo.db.command('ping')
+        print("Pinged your deployment. You successfully connected to MongoDB!")
+        return "Pinged your deployment. You successfully connected to MongoDB!"
+    except Exception as e:
+        print(e)
+        return "Error connecting to MongoDB: " + str(e)
+
 # Add student
 @app.route('/add', methods=['GET', 'POST'])
 def add_student():
