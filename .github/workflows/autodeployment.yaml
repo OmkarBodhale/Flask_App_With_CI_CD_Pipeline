@@ -10,20 +10,20 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5 # Terminate the job if it takes longer than 5 minutes
     steps:
-      - name: Checkout code
+      - name: Stage 1 - Checkout code
         uses: actions/checkout@v7
         
-      - name: Set up Python
+      - name: Stage 2 - Set up Python
         uses: actions/setup-python@v7
         with:
           python-version: '3.13'
 
-      - name: Install dependencies
+      - name: Stage 3 - Install dependencies
         run: |
             python -m pip install --upgrade pip
             pip install -r requirements.txt
 
-      - name: Run Pytest
+      - name: Stage 4 - Run Pytest
         # Map the GitHub secret to the environment variable your Python code is looking for
         env: 
           MONGO_URI: ${{ secrets.MONGO_URI }}
@@ -31,10 +31,7 @@ jobs:
           SECRET_KEY: ${{ secrets.SECRET_KEY }}
         run: pytest
 
-      - name: Build Solution
-      # Map the GitHub secret to the environment variable your Python code is looking for
-        env: 
-          MONGO_URI: ${{ secrets.MONGO_URI }}
-          TEST_MONGO_URI: ${{ secrets.TEST_MONGO_URI }}
-          SECRET_KEY: ${{ secrets.SECRET_KEY }}
-        run: python app.py
+      - name: Stage 5 - Build Docker image
+        run: |
+            docker build -t flaskappwithcicdpipeline:${{ github.sha }} .
+            docker images
