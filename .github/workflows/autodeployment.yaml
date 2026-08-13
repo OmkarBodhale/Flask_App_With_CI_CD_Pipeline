@@ -34,6 +34,5 @@ jobs:
       - name: Stage 5 - Build Docker image
         run: |
             ls
-            cd ./Flask_App_With_CI_CD_Pipeline/
-            docker build -t flaskappwithcicdpipeline:${{ github.sha }} .
+            docker build -f DockerFile -t flaskappwithcicdpipeline:${{ github.sha }} .
             docker images
