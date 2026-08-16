@@ -92,7 +92,7 @@ jobs:
             docker rm ${ECR_REPO} || true
             
             # Run the new container
-            docker run -d --name ${ECR_REPO } -p 5000:5000 \
+            docker run -d --name ${ECR_REPO} -p 5000:5000 \
               -e MONGO_URI="${{ secrets.MONGO_URI }}" \
               -e SECRET_KEY="${{ secrets.SECRET_KEY }}" \
               $REGISTRY/$ECR_REPO:${{ github.sha }}
