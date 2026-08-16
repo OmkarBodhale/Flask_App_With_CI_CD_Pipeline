@@ -17,6 +17,9 @@ jobs:
       AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
       AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
       ECR_REPO: ${{ secrets.AWS_ECR_REPO }}
+      EC2_HOST: ${{ secrets.EC2_HOST }}
+      EC2_USERNAME: ${{ secrets.EC2_USERNAME }}
+      EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
 
     steps:
       - name: Stage 1 - Checkout code
@@ -64,3 +67,48 @@ jobs:
             
             # Push the Docker image to Amazon ECR
             docker push ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_DEFAULT_REGION }}.amazonaws.com/${{ env.ECR_REPO }}:${{ github.sha }}
+          
+      # 7. Deploy to EC2 (Using native OpenSSH)
+      - name: Stage 7 - Deploy to EC2
+        run: |
+          # 1. Configure SSH private key and permissions
+          mkdir -p ~/.ssh
+          echo "${{ env.EC2_SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          
+          # 2. Set registry endpoint
+          REGISTRY="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com"
+
+          # 3. Execute remote commands on EC2 via SSH
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ${EC2_USERNAME }@${EC2_HOST } << EOF
+            # Authenticate Docker on the EC2 instance
+            aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $REGISTRY
+            
+            # Pull the new image
+            docker pull $REGISTRY/$ECR_REPO:${{ github.sha }}
+            
+            # Stop and remove existing container if running
+            docker stop ${ECR_REPO } || true
+            docker rm ${ECR_REPO } || true
+            
+            # Run the new container
+            docker run -d --name ${ECR_REPO } -p 5000:5000 \
+              -e MONGO_URI="${{ secrets.MONGO_URI }}" \
+              -e SECRET_KEY="${{ secrets.SECRET_KEY }}" \
+              $REGISTRY/$ECR_REPO:${{ github.sha }}
+          EOF
+
+      # 8. Verify /health Endpoint (Using native cURL)
+      - name: Stage 8 - Verify /health endpoint
+        run: |
+          echo "Polling /health endpoint..."
+          for i in {1..5}; do
+            if curl -s -f http://${{ env.EC2_HOST }}/health; then
+              echo "Health check passed!"
+              exit 0
+            fi
+            echo "Waiting for service to become healthy..."
+            sleep 10
+          done
+          echo "Health check failed."
+          exit 1
