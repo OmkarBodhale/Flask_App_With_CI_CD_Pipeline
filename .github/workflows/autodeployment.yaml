@@ -42,7 +42,7 @@ jobs:
 
       - name: Stage 5 - Build Docker image
         run: |
-            echo ${{ env.ECR_REPO }}
+            ls
             docker build -t ${{ env.ECR_REPO }}:${{ github.sha }} .
             docker images
             
