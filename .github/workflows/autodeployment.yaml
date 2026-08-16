@@ -43,7 +43,7 @@ jobs:
       - name: Stage 5 - Build Docker image
         run: |
             ls
-            docker build -t ${{ env.ECR_REPO }}:${{ github.sha }} .
+            docker build -f DockerFile -t ${{ env.ECR_REPO }}:${{ github.sha }} .
             docker images
             
       # Prerequisite for ECR and EC2 Deployment
