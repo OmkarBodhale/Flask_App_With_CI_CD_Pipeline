@@ -54,7 +54,7 @@ jobs:
           aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_DEFAULT_REGION }} # Updated to match your region
       
-      - name: Stage 5 - Push to ECR
+      - name: Stage 6 - Push to ECR
         run: |
             # Authenticate Docker to the Amazon ECR registry
             aws ecr get-login-password --region ${{ env.AWS_DEFAULT_REGION }} | docker login --username AWS --password-stdin ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_DEFAULT_REGION }}.amazonaws.com
