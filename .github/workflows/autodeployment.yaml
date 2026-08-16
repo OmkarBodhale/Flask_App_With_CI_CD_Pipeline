@@ -9,6 +9,15 @@ jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 5 # Terminate the job if it takes longer than 5 minutes
+
+    # Pass AWS credentials as environment variables across all steps in this job
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: vars.AWS_REGION
+      AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+      ECR_REPO: vars.AWS_ECR_REPO
+
     steps:
       - name: Stage 1 - Checkout code
         uses: actions/checkout@v7
@@ -33,14 +42,24 @@ jobs:
 
       - name: Stage 5 - Build Docker image
         run: |
-            ls
-            docker build -f DockerFile -t flaskappwithcicdpipeline:${{ github.sha }} .
+            docker build -t ${{ env.ECR_REPO }}:${{ github.sha }} .
             docker images
-
+            
       # Prerequisite for ECR and EC2 Deployment
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v6
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ vars.AWS_REGION }} # Updated to match your region
+          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_DEFAULT_REGION }} # Updated to match your region
+      
+      - name: Stage 5 - Push to ECR
+        run: |
+            # Authenticate Docker to the Amazon ECR registry
+            aws ecr get-login-password --region ${{ env.AWS_DEFAULT_REGION }} | docker login --username AWS --password-stdin ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_DEFAULT_REGION }}.amazonaws.com
+            
+            # Tag the Docker image with the ECR repository URI and the GitHub SHA
+            docker tag ${{ env.ECR_REPO }}:${{ github.sha }} ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_DEFAULT_REGION }}.amazonaws.com/${{ env.ECR_REPO }}:${{ github.sha }}
+            
+            # Push the Docker image to Amazon ECR
+            docker push ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_DEFAULT_REGION }}.amazonaws.com/${{ env.ECR_REPO }}:${{ github.sha }}
