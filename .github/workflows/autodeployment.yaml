@@ -14,9 +14,9 @@ jobs:
     env:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      AWS_DEFAULT_REGION: vars.AWS_REGION
+      AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
       AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
-      ECR_REPO: vars.AWS_ECR_REPO
+      ECR_REPO: ${{ secrets.AWS_ECR_REPO }}
 
     steps:
       - name: Stage 1 - Checkout code
@@ -43,7 +43,6 @@ jobs:
       - name: Stage 5 - Build Docker image
         run: |
             echo ${{ env.ECR_REPO }}
-            echo ${{ vars.AWS_ECR_REPO }}
             docker build -t ${{ env.ECR_REPO }}:${{ github.sha }} .
             docker images
             
