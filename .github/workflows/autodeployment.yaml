@@ -8,7 +8,7 @@ name: Auto Deployment
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 5 # Terminate the job if it takes longer than 5 minutes
+    timeout-minutes: 10 # Terminate the job if it takes longer than 10 minutes
 
     # Pass AWS credentials as environment variables across all steps in this job
     env:
