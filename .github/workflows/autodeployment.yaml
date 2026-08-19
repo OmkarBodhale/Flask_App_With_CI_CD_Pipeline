@@ -87,6 +87,9 @@ jobs:
           # 3. Execute remote commands on EC2 via SSH
           echo "Stage 7.30"
           ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ${EC2_USERNAME}@${EC2_HOST} << EOF
+
+          # Enable Docker to start on boot
+            sudo systemctl enable docker.service containerd.service
             # Authenticate Docker on the EC2 instance
             aws ecr get-login-password --region $AWS_DEFAULT_REGION | sudo docker login --username AWS --password-stdin $REGISTRY
           echo "Stage 7.31"
@@ -101,6 +104,7 @@ jobs:
             
             # Run the new container
             sudo docker run -d --name ${ECR_REPO} -p 5000:5000 \
+            --restart unless-stopped \
               -e MONGO_URI="${{ secrets.MONGO_URI }}" \
               -e SECRET_KEY="${{ secrets.SECRET_KEY }}" \
               $REGISTRY/$ECR_REPO:${{ github.sha }}
