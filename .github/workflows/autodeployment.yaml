@@ -21,6 +21,7 @@ jobs:
       EC2_USERNAME: ${{ secrets.EC2_USERNAME }}
       EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
       EC2_HOST_PORT: ${{ secrets.EC2_HOST_PORT }}
+      WORKFLOW_STATUS_SNS_TOPIC_NAME: ${{ secrets.WORKFLOW_STATUS_SNS_TOPIC_NAME }}
 
     steps:
       - name: Stage 1 - Checkout code
@@ -141,7 +142,7 @@ jobs:
           fi
 
           aws sns publish \
-            --topic-arn "arn:aws:sns:${{ vars.AWS_DEFAULT_REGION }}:${{ secrets.AWS_ACCOUNT_ID }}:${{ vars.WORKFLOW_STATUS_SNS_TOPIC_NAME }}" \
+            --topic-arn "arn:aws:sns:${{ env.AWS_DEFAULT_REGION }}:${{ env.AWS_ACCOUNT_ID }}:${{ env.WORKFLOW_STATUS_SNS_TOPIC_NAME }}" \
             --subject "$SUBJECT" \
             --message "$MESSAGE"
       
