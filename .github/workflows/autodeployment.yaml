@@ -89,7 +89,9 @@ jobs:
           ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ${EC2_USERNAME}@${EC2_HOST} << EOF
 
           # Enable Docker to start on boot
+          echo "Stage 7.30.0"
             sudo systemctl enable docker.service containerd.service
+            echo "Stage 7.30.1"
             # Authenticate Docker on the EC2 instance
             aws ecr get-login-password --region $AWS_DEFAULT_REGION | sudo docker login --username AWS --password-stdin $REGISTRY
           echo "Stage 7.31"
