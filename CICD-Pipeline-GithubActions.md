@@ -51,10 +51,12 @@ Our GitHub Actions workflow is broken down into 8 distinct stages. Below is a de
 3. Create IAM user assign **EC2-ECR-Access-Role** access.
 <img width="1540" height="411" alt="image" src="https://github.com/user-attachments/assets/a6dfac53-5002-4f96-a17c-74d318d5abda" />
 
-4. Create EC2 Instance and assign **EC2-ECR-Access-Role**.
+4. Create EC2 Instance and assign **EC2-ECR-Access-Role** also Install Docker and AWS CLI.
 <img width="1600" height="750" alt="image" src="https://github.com/user-attachments/assets/9d846548-6f76-4285-ac97-070976b51a72" />
 
-5. Install Docker and AWS CLI on the EC2.
+5. ECR Repo
+<img width="1903" height="862" alt="image" src="https://github.com/user-attachments/assets/3dbf5681-c8d5-48da-b580-021a5e966cbc" />
+
 
 6. Create SNS Topic and Subscriber.
 <img width="1907" height="782" alt="image" src="https://github.com/user-attachments/assets/8be85450-f01b-4ea6-a817-eae4be5555b3" />
