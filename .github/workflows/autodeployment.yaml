@@ -87,7 +87,7 @@ jobs:
           echo "Stage 7.30"
           ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ${EC2_USERNAME}@${EC2_HOST} << EOF
             # Authenticate Docker on the EC2 instance
-            aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $REGISTRY
+            aws ecr get-login-password --region $AWS_DEFAULT_REGION | sudo docker login --username AWS --password-stdin $REGISTRY
           echo "Stage 7.31"
             
             # Pull the new image
