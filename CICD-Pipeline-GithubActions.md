@@ -13,8 +13,11 @@ Before the pipeline can run successfully, ensure you have configured the necessa
 *   **ECR Registry URI:** The URL to your target Elastic Container Registry.
 *   **EC2 SSH Details:** Host IP, username, and SSH private key.
 *   **Email Configuration:** AWS SNS Topic and Subscriber.
+*   **AWS Setup:** AWS VPC, EC2 Instance, IAM User with ECR Full Access,ECR Repo, SNS Topic and Subscription.
 
-Note: Below Github Scretes needs to be created and feed with the proper valid values.
+Note: 
+* Below Github Scretes needs to be created and feed with the proper valid values.
+* EC2 Instance Prerequisite to Install Docker and AWS CLI.
  
 | COMPONENTS | GITHUB ACTIONS SECRETS | GITHUB ACTIONS SECRETS DESCRIPTION |
 | :--- | :--- | :--- |
@@ -37,56 +40,44 @@ Note: Below Github Scretes needs to be created and feed with the proper valid va
 
 Our GitHub Actions workflow is broken down into 8 distinct stages. Below is a detailed explanation of what happens at each stage and what you should expect to see in the execution logs.
 
-### 1. Checkout
-The pipeline initiates automatically on a push to the `main` branch. This stage uses the standard `actions/checkout` tool to pull the latest application source code into the GitHub Actions runner environment.
-> **Expected Output:**
-> ![Checkout Stage](screenshots/01_checkout.png)
-> *The logs will show a successful fetch of the repository contents and commit history.*
+1. Create a VPC Network.
+<img width="1603" height="720" alt="image" src="https://github.com/user-attachments/assets/584100c9-5fea-4e85-96fc-d044647a48bc" />
 
-### 2. Install
-Once the code is available, the pipeline installs all required Python dependencies by executing `pip install -r requirements.txt`.
-> **Expected Output:**
-> ![Install Stage](screenshots/02_install.png)
-> *The logs will display the downloading and installation of packages like Flask, Pytest, etc.*
+2. Create a **EC2-ECR-Access-Role** IAM Policy with below access and Inbound Rules assigned.
+<img width="1888" height="858" alt="image" src="https://github.com/user-attachments/assets/d6c5023b-9d08-4442-9ae7-0470060e2303" />
+<img width="1608" height="707" alt="image" src="https://github.com/user-attachments/assets/7969356a-a2c2-42a9-bdea-627d0095cc55" />
 
-### 3. Test
-To ensure code quality and stability, `pytest` is executed against our test suite. **Note:** The pipeline is configured as a strict gate here; it will halt immediately if any single test fails.
-> **Expected Output:**
-> ![Test Stage](screenshots/03_test.png)
-> *A summary showing all tests passing (e.g., `10 passed in 0.45s`).*
 
-### 4. Build
-With tests passed, the pipeline builds a new Docker image of the application. To ensure traceability, this image is uniquely tagged using the specific GitHub commit SHA (`${{ github.sha }}`).
-> **Expected Output:**
-> ![Build Stage](screenshots/04_build.png)
-> *The Docker build output showing the layers being successfully packaged and tagged.*
+3. Create IAM user assign **EC2-ECR-Access-Role** access.
+<img width="1540" height="411" alt="image" src="https://github.com/user-attachments/assets/a6dfac53-5002-4f96-a17c-74d318d5abda" />
 
-### 5. Push to ECR
-The runner authenticates with AWS and pushes the newly built and tagged Docker image to your designated Elastic Container Registry (ECR).
-> **Expected Output:**
-> ![Push to ECR](screenshots/05_push_ecr.png)
-> *Logs confirming the image layers have been successfully pushed to the AWS registry URI.*
+4. Create EC2 Instance and assign **EC2-ECR-Access-Role**.
+<img width="1600" height="750" alt="image" src="https://github.com/user-attachments/assets/9d846548-6f76-4285-ac97-070976b51a72" />
 
-### 6. Deploy to EC2
-The pipeline establishes a secure SSH connection to the target EC2 instance. It executes commands to:
-1. Pull the new Docker image from ECR.
-2. Stop and remove the old running container.
-3. Start a new container using the freshly pulled image.
-> **Expected Output:**
-> ![Deploy Stage](screenshots/06_deploy_ec2.png)
-> *SSH execution logs showing the Docker CLI commands executing successfully on the remote server.*
+5. Install Docker and AWS CLI on the EC2.
 
-### 7. Verify
-Deployment isn't considered complete until the app is confirmed alive. This stage acts as the final success gate by polling the application's `/health` endpoint.
-> **Expected Output:**
-> ![Verify Stage](screenshots/07_verify.png)
-> *An HTTP 200 OK response received from the health check script/curl command.*
+6. Create SNS Topic and Subscriber.
+<img width="1907" height="782" alt="image" src="https://github.com/user-attachments/assets/8be85450-f01b-4ea6-a817-eae4be5555b3" />
+<img width="1897" height="793" alt="image" src="https://github.com/user-attachments/assets/1dfc066b-bca6-431b-9488-b28cd383845d" />
 
-### 8. Notify
-Regardless of whether the pipeline succeeded or failed at an earlier step, an email notification is dispatched. This ensures the development team is immediately aware of the deployment status.
-> **Expected Output:**
-> ![Notify Stage](screenshots/08_notify.png)
-> *Log confirming the email was sent, alongside a screenshot of the actual email received in the inbox.*
+7. Confirm the SNS Service Subscription.
+<img width="1915" height="962" alt="image" src="https://github.com/user-attachments/assets/b2b0a13a-55b7-4220-9dc9-b80a27923c20" />
+
+8. Setup Github Secrets Variables and configure with proper values.
+<img width="1906" height="958" alt="image" src="https://github.com/user-attachments/assets/40f3c325-ae6e-41a5-8e27-4f377fbe7e02" />
+
+9. Execuete autodeployment.yaml workflow.
+
+10. Execute Successful and Failure Screnario and check whether Alerts receiving receiving or not.
+<img width="1892" height="867" alt="image" src="https://github.com/user-attachments/assets/2ca7c817-21e3-492f-969d-f66dad94d56c" />
+<img width="1885" height="867" alt="image" src="https://github.com/user-attachments/assets/99f7a55b-ed6a-4007-91c5-c1f809d905ec" />
+
+11. Alert Notification 
+<img width="1565" height="757" alt="image" src="https://github.com/user-attachments/assets/fd3f642e-d236-4d57-8a5a-dc55474c2204" />
+<img width="1561" height="762" alt="image" src="https://github.com/user-attachments/assets/32757371-bcd4-41e5-92a7-d90f767a7cbe" />
+
+
+
 
 ---
 *For further troubleshooting, check the **Actions** tab in this GitHub repository to view raw logs for any failed workflow runs.*
