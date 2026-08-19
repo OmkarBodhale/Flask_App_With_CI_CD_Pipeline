@@ -29,6 +29,8 @@ Note: Below Github Scretes needs to be created and feed with the proper valid va
 | **EC2 Configuration**| `EC2_HOST_PORT` | EC2 HOST_PORT |
 | **AWS SNS Topic Name** | `WORKFLOW_STATUS_SNS_TOPIC_NAME`| SNS TOPIC NAME |
 
+## System Architecture
+<img width="777" height="853" alt="image" src="https://github.com/user-attachments/assets/d0b57f12-1e9a-41fb-82d5-8f8d6adac328" />
 ---
 
 ## 🚀 Pipeline Workflow & Implementation Steps
