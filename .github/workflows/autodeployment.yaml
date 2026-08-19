@@ -72,30 +72,38 @@ jobs:
       - name: Stage 7 - Deploy to EC2
         run: |
           # 1. Configure SSH private key and permissions
+          echo "Stage 7.10"
           mkdir -p ~/.ssh
           echo "${{ env.EC2_SSH_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
+          echo "Stage 7.11"
           
           # 2. Set registry endpoint
+          echo "Stage 7.20"
           REGISTRY="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com"
+          echo "Stage 7.21"
 
           # 3. Execute remote commands on EC2 via SSH
+          echo "Stage 7.30"
           ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa ${EC2_USERNAME}@${EC2_HOST} << EOF
             # Authenticate Docker on the EC2 instance
             aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $REGISTRY
+          echo "Stage 7.31"
             
             # Pull the new image
             sudo docker pull $REGISTRY/$ECR_REPO:${{ github.sha }}
-            
+            echo "Stage 7.32"
             # Stop and remove existing container if running
             sudo docker stop ${ECR_REPO} || true
             sudo docker rm ${ECR_REPO} || true
+            echo "Stage 7.33"
             
             # Run the new container
             sudo docker run -d --name ${ECR_REPO} -p 5000:5000 \
               -e MONGO_URI="${{ secrets.MONGO_URI }}" \
               -e SECRET_KEY="${{ secrets.SECRET_KEY }}" \
               $REGISTRY/$ECR_REPO:${{ github.sha }}
+            echo "Stage 7.4"
           EOF
 
       # 8. Verify /health Endpoint (Using native cURL)
