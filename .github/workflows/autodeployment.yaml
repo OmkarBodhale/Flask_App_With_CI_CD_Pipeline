@@ -138,7 +138,7 @@ jobs:
             MESSAGE="The latest code was successfully deployed to production."
           else
             SUBJECT="GitHub Action Alert: Deployment Failed"
-            MESSAGE="The deployment process failed. Please check the GitHub Actions logs for details."
+            MESSAGE="The deployment process failed for ${{ env.ECR_REPO }}:${{ github.sha }}. Please check the GitHub Actions logs for details."
           fi
 
           aws sns publish \
