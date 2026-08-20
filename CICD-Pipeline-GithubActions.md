@@ -48,8 +48,46 @@ Our GitHub Actions workflow is broken down into 8 distinct stages. Below is a de
 <img width="1608" height="707" alt="image" src="https://github.com/user-attachments/assets/7969356a-a2c2-42a9-bdea-627d0095cc55" />
 
 
-3. Create IAM user assign **EC2-ECR-Access-Role** access.
-<img width="1540" height="411" alt="image" src="https://github.com/user-attachments/assets/a6dfac53-5002-4f96-a17c-74d318d5abda" />
+3. Create IAM user assign **CLI-ECR-PUSH-PULL-ACCESS-POLICY** access.
+<img width="1913" height="803" alt="image" src="https://github.com/user-attachments/assets/81efb648-e131-411d-ace2-a0378d818389" />
+<img width="1902" height="802" alt="image" src="https://github.com/user-attachments/assets/a56446f4-6c74-4ff8-ac65-f3d4ab19b5e7" />
+
+## 🔐 IAM Role Permissions
+AWS CLI user access role to push and pull ECR Repo.
+
+```json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "GetAuthorizationToken",
+            "Effect": "Allow",
+            "Action": [
+                "ecr:GetAuthorizationToken"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "ManageRepositoryContents",
+            "Effect": "Allow",
+            "Action": [
+                "ecr:BatchCheckLayerAvailability",
+                "ecr:GetDownloadUrlForLayer",
+                "ecr:GetRepositoryPolicy",
+                "ecr:DescribeRepositories",
+                "ecr:ListImages",
+                "ecr:DescribeImages",
+                "ecr:BatchGetImage",
+                "ecr:InitiateLayerUpload",
+                "ecr:UploadLayerPart",
+                "ecr:CompleteLayerUpload",
+                "ecr:PutImage"
+            ],
+            "Resource": "arn:aws:ecr:us-east-1:071146695294:repository/flaskcicdpipeline"
+        }
+    ]
+}
+```
 
 4. Create EC2 Instance and assign **EC2-ECR-Access-Role** also Install Docker and AWS CLI.
 <img width="1600" height="750" alt="image" src="https://github.com/user-attachments/assets/9d846548-6f76-4285-ac97-070976b51a72" />
@@ -78,8 +116,3 @@ Our GitHub Actions workflow is broken down into 8 distinct stages. Below is a de
 <img width="1565" height="757" alt="image" src="https://github.com/user-attachments/assets/fd3f642e-d236-4d57-8a5a-dc55474c2204" />
 <img width="1561" height="762" alt="image" src="https://github.com/user-attachments/assets/32757371-bcd4-41e5-92a7-d90f767a7cbe" />
 
-
-
-
----
-*For further troubleshooting, check the **Actions** tab in this GitHub repository to view raw logs for any failed workflow runs.*
